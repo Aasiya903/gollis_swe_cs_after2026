@@ -1,38 +1,50 @@
 <?php
 session_start();
-include 'config/db.php';
+include "config/db.php";
+
+// PHP code-kaaga halkan
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Digital Madrasa System</h1>
+
+<form method="POST">
+    <input type="text" name="username">
+    <input type="password" name="password">
+    <button type="submit">Login</button>
+</form>
+
+</body>
+</html>
 
 if(isset($_POST['login'])){
 
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+$username=$_POST['username'];
+$password=md5($_POST['password']);
 
-    $query = mysqli_query($conn,
-        "SELECT * FROM users WHERE username='$username'");
+$sql=mysqli_query($conn,"SELECT * FROM users
+WHERE username='$username'
+AND password='$password'");
 
-    if(mysqli_num_rows($query) > 0){
+if(mysqli_num_rows($sql)>0){
 
-        $user = mysqli_fetch_assoc($query);
+$_SESSION['admin']=$username;
 
-        if(password_verify($password, $user['password'])){
+header("Location:admin/dashboard.php");
 
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
+}else{
 
-            header("Location: admin/dashboard.php");
-        }
-    }
+$error="Invalid Username or Password";
+
 }
+
+}
+
 ?>
-
-<form method="POST">
-    Username:
-    <input type="text" name="username">
-
-    Password:
-    <input type="password" name="password">
-
-    <button type="submit" name="login">
-        Login
-    </button>
-</form>
