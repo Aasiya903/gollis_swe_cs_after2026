@@ -1,94 +1,93 @@
 <?php
+$login_path = "../auth/login.php";
 require_once __DIR__ . '/../db/connection.php';
 
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$search = isset($_GET['search']) ? trim($_GET['search']) : "";
 
-if ($search !== '') {
-    $like = '%' . mysqli_real_escape_string($conn, $search) . '%';
-    $sql = "SELECT * FROM students WHERE full_name LIKE '$like' OR class_level LIKE '$like' ORDER BY full_name";
+if ($search !== "") {
+    $like = "%" . $search . "%";
+    $stmt = mysqli_prepare($conn,
+        "SELECT * FROM students WHERE full_name LIKE ? OR roll_no LIKE ? OR class_name LIKE ? ORDER BY id DESC");
+    mysqli_stmt_bind_param($stmt, "sss", $like, $like, $like);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 } else {
-    $sql = "SELECT * FROM students ORDER BY full_name";
+    $result = mysqli_query($conn, "SELECT * FROM students ORDER BY id DESC");
 }
-
-$result = mysqli_query($conn, $sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Students - Madrasa Management System</title>
+<title>Students - Madrasa System</title>
 <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
 <div class="navbar">
-    <div class="brand">Madrasa Management System</div>
-    <nav>
-        <a href="../dashboard.php">Dashboard</a>
-        <a href="view_students.php">Students</a>
-        <a href="../teachers/view_teachers.php">Teachers</a>
-        <a href="../attendance/view_attendance.php">Attendance</a>
-    </nav>
-</div>
-
-<div class="container">
-    <div class="card">
-        <h1>Students</h1>
-
-        <?php if (isset($_GET['deleted'])): ?>
-            <div class="alert alert-success">Student deleted successfully.</div>
-        <?php endif; ?>
-        <?php if (isset($_GET['updated'])): ?>
-            <div class="alert alert-success">Student updated successfully.</div>
-        <?php endif; ?>
-
-        <form method="GET" action="view_students.php" style="margin-bottom:18px;">
-            <input type="text" name="search" placeholder="Search by name or class..."
-                   value="<?= htmlspecialchars($search) ?>" style="max-width:300px;display:inline-block;">
-            <button type="submit" class="btn" style="margin-top:0;">Search</button>
-            <a href="add_student.php" class="btn" style="margin-top:0;float:right;">+ Add Student</a>
-        </form>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    <th>Class</th>
-                    <th>Guardian</th>
-                    <th>Phone</th>
-                    <th>Enrolled</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (mysqli_num_rows($result) === 0): ?>
-                    <tr><td colspan="8">No students found.</td></tr>
-                <?php else: ?>
-                    <?php $i = 1; while ($row = mysqli_fetch_assoc($result)): ?>
-                        <tr>
-                            <td><?= $i++ ?></td>
-                            <td><?= htmlspecialchars($row['full_name']) ?></td>
-                            <td><?= htmlspecialchars($row['gender']) ?></td>
-                            <td><?= htmlspecialchars($row['class_level']) ?></td>
-                            <td><?= htmlspecialchars($row['guardian_name']) ?></td>
-                            <td><?= htmlspecialchars($row['guardian_phone']) ?></td>
-                            <td><?= htmlspecialchars($row['enrollment_date']) ?></td>
-                            <td class="actions">
-                                <a class="edit" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a>
-                                <a class="delete" href="delete_student.php?id=<?= $row['id'] ?>"
-                                   onclick="return confirm('Delete this student?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    <div>
+        <h1>Madrasa Management System</h1>
+        <div class="subtitle">Students</div>
+    </div>
+    <div>
+        <a href="../auth/logout.php" class="logout-link">Logout</a>
     </div>
 </div>
 
-<div class="footer">Madrasa Management System</div>
+<div class="container">
+    <div class="breadcrumb"><a href="../dashboard.php">Dashboard</a> / Students</div>
+
+    <div class="card">
+        <div class="top-bar">
+            <h2 style="margin:0;">All Students</h2>
+            <a href="add_student.php" class="btn btn-primary">+ Add Student</a>
+        </div>
+
+        <?php if (isset($_GET['added'])): ?>
+            <div class="alert alert-success">Student added successfully.</div>
+        <?php elseif (isset($_GET['updated'])): ?>
+            <div class="alert alert-success">Student updated successfully.</div>
+        <?php elseif (isset($_GET['deleted'])): ?>
+            <div class="alert alert-success">Student deleted successfully.</div>
+        <?php endif; ?>
+
+        <form method="GET" action="" style="margin-bottom:16px;">
+            <input type="text" name="search" placeholder="Search by name, roll no, or class..."
+                   value="<?= htmlspecialchars($search) ?>" style="max-width:300px; display:inline-block;">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <a href="view_students.php" class="btn btn-sm">Reset</a>
+        </form>
+
+        <table>
+            <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Gender</th>
+                <th>Guardian</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+            <?php if (mysqli_num_rows($result) === 0): ?>
+                <tr><td colspan="7" style="text-align:center; color:var(--muted);">No students found.</td></tr>
+            <?php else: while ($row = mysqli_fetch_assoc($result)): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['roll_no']) ?></td>
+                    <td><?= htmlspecialchars($row['full_name']) ?></td>
+                    <td><?= htmlspecialchars($row['class_name']) ?></td>
+                    <td><?= htmlspecialchars($row['gender']) ?></td>
+                    <td><?= htmlspecialchars($row['guardian_name']) ?></td>
+                    <td><?= htmlspecialchars($row['phone']) ?></td>
+                    <td class="actions">
+                        <a href="edit_student.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="delete_student.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Delete this student? This will also remove their attendance records.');">Delete</a>
+                    </td>
+                </tr>
+            <?php endwhile; endif; ?>
+        </table>
+    </div>
+</div>
 
 </body>
 </html>
