@@ -1,76 +1,66 @@
 <?php
-require_once __DIR__ . '/db/connection.php';
 
-// Counts for the stat cards
-$studentCount = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM students"))[0];
-$teacherCount = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM teachers"))[0];
+session_start();
 
-$today = date('Y-m-d');
-$presentToday = mysqli_fetch_row(mysqli_query(
-    $conn,
-    "SELECT COUNT(*) FROM attendance WHERE attendance_date = '$today' AND status = 'Present'"
-))[0];
-$absentToday = mysqli_fetch_row(mysqli_query(
-    $conn,
-    "SELECT COUNT(*) FROM attendance WHERE attendance_date = '$today' AND status = 'Absent'"
-))[0];
+if(!isset($_SESSION['admin'])){
+
+header("Location:../login.php");
+
+}
+
+include("db/connection.php");
+
+$total=mysqli_num_rows(mysqli_query($conn,"SELECT * FROM students"));
+
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
+
 <head>
-<meta charset="UTF-8">
-<title>Dashboard - Madrasa Management System</title>
-<link rel="stylesheet" href="css/style.css">
+
+<title>Dashboard</title>
+
+<link rel="stylesheet"
+href="../assets/style.css">
+
 </head>
+
 <body>
 
-<div class="navbar">
-    <div class="brand">Madrasa Management System</div>
-    <nav>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="students/view_students.php">Students</a>
-        <a href="teachers/view_teachers.php">Teachers</a>
-        <a href="attendance/view_attendance.php">Attendance</a>
-    </nav>
-</div>
+<header>
+
+<h1>Madrasa Management System</h1>
+
+</header>
+
+<nav>
+
+<a href="dashboard.php">Dashboard</a>
+
+<a href="students.php">Students</a>
+
+<a href="../teachers/attendance.php">Attendance</a>
+
+<a href="../logout.php">Logout</a>
+
+</nav>
 
 <div class="container">
-    <h1>Welcome back</h1>
-    <p>Here is a quick overview of the madrasa today.</p>
 
-    <div class="dashboard-grid">
-        <div class="stat-card">
-            <div class="stat-number"><?= (int)$studentCount ?></div>
-            <div class="stat-label">Total Students</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number"><?= (int)$teacherCount ?></div>
-            <div class="stat-label">Total Teachers</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number"><?= (int)$presentToday ?></div>
-            <div class="stat-label">Present Today</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number"><?= (int)$absentToday ?></div>
-            <div class="stat-label">Absent Today</div>
-        </div>
-    </div>
+<div class="card">
 
-    <div class="card">
-        <h2>Quick Links</h2>
-        <div class="menu-links">
-            <a href="students/add_student.php">+ Add Student</a>
-            <a href="students/view_students.php">View Students</a>
-            <a href="teachers/add_teacher.php">+ Add Teacher</a>
-            <a href="teachers/view_teachers.php">View Teachers</a>
-            <a href="attendance/add_attendance.php">+ Take Attendance</a>
-            <a href="attendance/view_attendance.php">View Attendance</a>
-        </div>
-    </div>
+<h2>Welcome <?php echo $_SESSION['admin']; ?></h2>
+
+<h3>Total Students</h3>
+
+<h1><?php echo $total; ?></h1>
+
 </div>
 
-<div class="footer">Madrasa Management System</div>
+</div>
 
 </body>
-</html>
+
+</html> 

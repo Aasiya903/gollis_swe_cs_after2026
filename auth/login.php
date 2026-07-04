@@ -26,20 +26,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Login</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/login.css">
 </head>
 <body>
 
 <div class="container">
     <div class="card">
 
-        <h2>Login</h2>
+        <h1>Login</h1>
 
         <?php if($error): ?>
             <p style="color:red;"><?php echo $error; ?></p>
         <?php endif; ?>
 
         <form method="POST">
+            
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
